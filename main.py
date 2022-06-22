@@ -9,6 +9,8 @@ from pathlib import Path
 import click
 import numpy as np
 
+from src.sim import
+
 logging.basicConfig(format="[%(asctime)s] %(levelname)s - %(message)s")
 logger = logging.getLogger()
 logger.addHandler(logging.StreamHandler())

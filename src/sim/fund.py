@@ -1,10 +1,13 @@
 """
 Datastore + simulation code for funds
 """
-from dataclasses import dataclass, asdict
+import datetime
+from dataclasses import asdict, dataclass, field
 from typing import Callable, List
 
 import pandas as pd
+import numpy as np
+
 
 @dataclass
 class Fund:
@@ -17,7 +20,7 @@ class Fund:
     name: str
     start_date: datetime.date
     end_date: datetime.date
-    return_params: List[float] = [0.01, 0.1]
+    return_params: List[float] = field(default_factory=lambda: [0.01, 0.1])
     return_generator: Callable = np.random.normal
 
     def to_frame(self):
@@ -26,9 +29,9 @@ class Fund:
 
     def simulate_performance(self) -> pd.DataFrame:
         """generate gross returns according to provided parameters"""
-        df = pd.DataFrame(index = pd.DateTimeIndex(start_date, end_date, freq="BD"))
-        df['fund'] = self.name
-        df['returns'] = self.return_generator(*self.return_params, size=df.shape)
+        df = pd.DataFrame(index=pd.DateTimeIndex(start_date, end_date, freq="BD"))
+        df["fund"] = self.name
+        df["returns"] = self.return_generator(*self.return_params, size=df.shape)
         return df
 
 
@@ -36,10 +39,10 @@ class Fund:
 class FundShareClass:
     """A shareclass of an investable fund"""
 
-    name: str,
-    fund_name: str, # fk to Fund name
-    mgmt_fee: float,
-    perf_fee: float,
+    name: str
+    fund_name: str  # fk to Fund name
+    mgmt_fee: float
+    perf_fee: float
 
     def to_frame(self):
         """Output as a dataframe row"""
@@ -48,4 +51,3 @@ class FundShareClass:
     def __repr__(self):
         """NB. we are not enforcing uniqueness anywhere"""
         return f"{self.fund_name}_{self.name}"
-

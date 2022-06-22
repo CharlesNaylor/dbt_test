@@ -5,7 +5,7 @@ import datetime
 import json
 import logging
 import random
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, asdict, field
 from pathlib import Path
 from typing import List
 
@@ -30,8 +30,8 @@ class Simulator:
     num_funds: int = 1
     num_customers: int = 25
     avg_turnover: float = 1
-    mgmt_fees: List[float] = [0.01, 0.005, 0]
-    perf_fees: List[float] = [0, 0.1, 0.2]
+    mgmt_fees: List[float] = field(default_factory=lambda: [0.01, 0.005, 0])
+    perf_fees: List[float] = field(default_factory=lambda: [0, 0.1, 0.2])
 
     @classmethod
     def from_json(cls, json_path: Path):
@@ -39,10 +39,21 @@ class Simulator:
         with open(Path(json_path), "r") as json_file:
             params = json.load(json_file)
 
+        params["start_date"] = datetime.datetime.strptime(
+            params["start_date"], "%Y-%m-%d"
+        ).date
+        params["end_date"] = datetime.datetime.strptime(
+            params["end_date"], "%Y-%m-%d"
+        ).date
+        return cls(**params)
+
     def to_json(self, json_path: Path):
         """save config to json"""
+        params = asdict(self)
+        params["start_date"] = params["start_date"].strftime("%Y-%m-%d")
+        params["end_date"] = params["end_date"].strftime("%Y-%m-%d")
         with open(Path(json_path), "w") as json_file:
-            json.dump(asdict(self), fp=json_file)
+            json.dump(params, fp=json_file)
 
     def _series_to_frame(self, los: List[pd.Series]):
         """
