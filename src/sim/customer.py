@@ -3,9 +3,9 @@ Data for customers
 """
 import datetime
 from dataclasses import dataclass, asdict
-from typing import Callable, List
 
 import pandas as pd
+import numpy as np
 
 
 @dataclass
@@ -46,12 +46,10 @@ class Investment:
         """Generate cashflows according to customer turnover.
         Note no association with fund performance has been included"""
 
-        df = pd.DataFrame(
-            index=pd.DateTimeIndex(start_date, end_date, freq="BD"),
+        frame = pd.DataFrame(
+            index=pd.date_range(start_date, end_date, freq="B"),
         )
-        n_days = df.shape[0]
-
-        initial_investment = np.random.randint(1e2, 1e7)
+        n_days = frame.shape[0]
 
         # turnover of 5, for our purposes,
         # means a customer should have an abs val. of cash flows
@@ -63,16 +61,16 @@ class Investment:
         p_turnover = 2 * turnover / n_days
 
         n_cashflows = np.random.binomial(n_days, p_turnover)
-        cashflow_days = np.random.choose(n_days, n_cashflows, replace=False)
+        cashflow_days = np.random.choice(n_days, n_cashflows, replace=False)
 
-        cashflow_sizes = np.random.standard_normal(shape=n_cashflows)
+        cashflow_sizes = np.random.standard_normal(size=n_cashflows)
         cashflow_sizes /= turnover * sum(np.abs(cashflow_sizes))
 
         cashflows = np.zeros(n_days)
         cashflows[cashflow_days] = cashflow_sizes
 
-        df["Customer"] = self.customer_name
-        df["shareclass"] = self.shareclass_name
-        df["cashflow"] = cashflows
+        frame["Customer"] = self.customer_name
+        frame["shareclass"] = self.shareclass_name
+        frame["cashflow"] = cashflows
 
-        return df
+        return frame

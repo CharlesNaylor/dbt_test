@@ -20,19 +20,24 @@ class Fund:
     name: str
     start_date: datetime.date
     end_date: datetime.date
-    return_params: List[float] = field(default_factory=lambda: [0.01, 0.1])
+    return_params: List[float] = field(default_factory=lambda: [0.01, 0.005])
     return_generator: Callable = np.random.normal
 
     def to_frame(self):
         """Output as a dataframe row"""
-        return pd.Series(asdict(self))
+        out = asdict(self)
+        # don't serialize the method
+        out["return_generator"] = out["return_generator"].__name__
+        return pd.Series(out)
 
     def simulate_performance(self) -> pd.DataFrame:
         """generate gross returns according to provided parameters"""
-        df = pd.DataFrame(index=pd.DateTimeIndex(start_date, end_date, freq="BD"))
-        df["fund"] = self.name
-        df["returns"] = self.return_generator(*self.return_params, size=df.shape)
-        return df
+        frame = pd.DataFrame(
+            index=pd.date_range(self.start_date, self.end_date, freq="B")
+        )
+        frame["fund"] = self.name
+        frame["returns"] = self.return_generator(*self.return_params, size=frame.shape)
+        return frame
 
 
 @dataclass

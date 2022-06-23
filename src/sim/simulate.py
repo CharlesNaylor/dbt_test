@@ -12,7 +12,8 @@ from typing import List
 import numpy as np
 import pandas as pd
 
-from src.sim.constants import FUND_NAMES, SHARECLASS_NAMES
+from src.sim.constants import CUSTOMER_NAMES, FUND_NAMES, SHARECLASS_NAMES
+from src.sim.customer import Customer, Investment
 from src.sim.fund import Fund, FundShareClass
 
 logger = logging.getLogger(__name__)
@@ -41,10 +42,10 @@ class Simulator:
 
         params["start_date"] = datetime.datetime.strptime(
             params["start_date"], "%Y-%m-%d"
-        ).date
+        ).date()
         params["end_date"] = datetime.datetime.strptime(
             params["end_date"], "%Y-%m-%d"
-        ).date
+        ).date()
         return cls(**params)
 
     def to_json(self, json_path: Path):
@@ -62,13 +63,13 @@ class Simulator:
         """
         return pd.DataFrame(
             [series.to_frame() for series in los],
-            columns=los[0].index,
+            columns=los[0].to_frame().index,
         )
 
-    def simulate(self, out_path: Path = None):
+    def simulate(self, out_path: Path = None, **kwargs):
         """Simulate fund accounting data using parameters"""
         if out_path is None:
-            out_path = Path(f"data/f{datetime.datetime.now():%Y%m%d%H%M}")
+            out_path = Path(f"data/f{datetime.datetime.now():%Y%m%d.%H%M}")
 
         logger.info("Generating fake data")
         # Funds
@@ -77,22 +78,21 @@ class Simulator:
                 name=fund_name,
                 start_date=self.start_date,
                 end_date=self.end_date,
-                return_scale=return_scale,
+                **kwargs,
             )
-            for fund_name in np.take(
-                np.random.choice(len(FUND_NAMES), self.num_funds, replace=False),
-                FUND_NAMES,
+            for fund_name in np.asarray(FUND_NAMES).take(
+                np.random.choice(len(FUND_NAMES), self.num_funds, replace=False)
             )
         ]
 
         ## Share classes
         share_classes = []
         for fund in funds:
-            for i in range(num_shareclasses):
+            for i in range(self.num_shareclasses):
                 share_classes.append(
                     FundShareClass(
                         name=SHARECLASS_NAMES[i],
-                        fund=fund.name,
+                        fund_name=fund.name,
                         mgmt_fee=random.choice(self.mgmt_fees),
                         perf_fee=random.choice(self.perf_fees),
                     ),
@@ -105,23 +105,25 @@ class Simulator:
 
         # Customers
         ## name, etc.
-        customers = [
-            Customer(name=f"{name}_{i}", turnover=turnover)
+        customers = {
+            f"{name}_{i}": Customer(name=f"{name}_{i}", turnover=turnover)
             for i, (name, turnover) in enumerate(
                 zip(
-                    np.take(np.random.choice(len(CUSTOMER_NAMES), CUSTOMER_NAMES)),
+                    np.asarray(CUSTOMER_NAMES).take(
+                        np.random.choice(len(CUSTOMER_NAMES), self.num_customers)
+                    ),
                     np.abs(
-                        np.random.normal(self.avg_turnover, shape=self.num_customers)
+                        np.random.normal(self.avg_turnover, size=self.num_customers)
                     ),
                 )
             )
-        ]
+        }
 
         ## investments
         # just make one shareclass-fund per customer
         investments = [
-            Investment(customer.name, random.choice(share_classes))
-            for customer in customers
+            Investment(customer.name, random.choice(share_classes).name)
+            for customer in customers.values()
         ]
 
         ## cash flows
@@ -130,6 +132,7 @@ class Simulator:
                 investment.simulate_cashflows(
                     start_date=self.start_date,
                     end_date=self.end_date,
+                    turnover=customers[investment.customer_name].turnover,
                 )
                 for investment in investments
             ]
@@ -143,6 +146,8 @@ class Simulator:
             out_path / "shareclasses.parquet"
         )
         performances.to_parquet(out_path / "fund_returns.parquet")
-        self._series_to_frame(customers).to_parquet(out_path / "customers.parquet")
-        self._series_to_frame(investment).to_parquet(out_path / "investment.parquet")
+        self._series_to_frame(list(customers.values())).to_parquet(
+            out_path / "customers.parquet"
+        )
+        self._series_to_frame(investments).to_parquet(out_path / "investment.parquet")
         cashflows.to_parquet(out_path / "cashflow.parquet")
