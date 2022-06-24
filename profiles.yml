@@ -1,0 +1,8 @@
+fund_accounting:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: './fundaccounting.duckdb'
+      #optional fields
+      #schema: schema_name 
