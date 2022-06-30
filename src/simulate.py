@@ -12,9 +12,9 @@ from typing import List
 import numpy as np
 import pandas as pd
 
-from src.sim.constants import CUSTOMER_NAMES, FUND_NAMES, SHARECLASS_NAMES
-from src.sim.customer import Customer, Investment
-from src.sim.fund import Fund, FundShareClass
+from src.constants import CUSTOMER_NAMES, FUND_NAMES, SHARECLASS_NAMES
+from src.customer import Customer, Investment
+from src.fund import Fund, FundShareClass
 
 logger = logging.getLogger(__name__)
 
@@ -72,6 +72,7 @@ class Simulator:
             out_path = Path(f"data/f{datetime.datetime.now():%Y%m%d.%H%M}")
 
         logger.info("Generating fake data")
+
         # Funds
         funds = [
             Fund(
@@ -81,7 +82,7 @@ class Simulator:
                 **kwargs,
             )
             for fund_name in np.asarray(FUND_NAMES).take(
-                np.random.choice(len(FUND_NAMES), self.num_funds, replace=False)
+                np.random.choice(len(FUND_NAMES) self.num_funds, replace=False)
             )
         ]
 
@@ -121,8 +122,9 @@ class Simulator:
 
         ## investments
         # just make one shareclass-fund per customer
-        investments = [
-            Investment(customer.name, random.choice(share_classes).name)
+        cashflows = [
+            CashFlow(customer.name, random.choice(share_classes).name, start_date=self.start_date, end_date=self.end_date, turnover=customer.turnover
+                     )
             for customer in customers.values()
         ]
 

@@ -7,7 +7,7 @@ from pathlib import Path
 
 import click
 
-from src.sim import Simulator
+from src import Simulator
 
 logging.basicConfig(format="[%(asctime)s] %(levelname)s - %(message)s")
 logger = logging.getLogger()

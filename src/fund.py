@@ -45,13 +45,14 @@ class FundShareClass:
     """A shareclass of an investable fund"""
 
     name: str
-    fund_name: str  # fk to Fund name
-    mgmt_fee: float
-    perf_fee: float
+    fund: Fund  # fk to Fund name
+    expense_ratio: float
 
     def to_frame(self):
         """Output as a dataframe row"""
-        return pd.Series(asdict(self))
+        return pd.Series(
+            dict(name=self.name, fund=self.fund.name, expense_ratio=self.expense_ratio)
+        )
 
     def __repr__(self):
         """NB. we are not enforcing uniqueness anywhere"""
