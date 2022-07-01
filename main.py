@@ -46,6 +46,18 @@ def generate_data(config_path: str, return_mean: float, return_scale: float):
     sim.simulate(out_path, return_params=[return_mean, return_scale])
 
 
+@cli.command()
+@click.option(
+    "--data_path",
+    required=True,
+    type=str,
+    help="Path to simulated data",
+)
+def calculate_impact(data_path: str):
+    """Calculate difference between share class expenses using specified data"""
+    raise NotImplementedError
+
+
 if __name__ == "__main__":
     cli()
     logger.info("Done")

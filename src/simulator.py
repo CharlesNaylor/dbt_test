@@ -129,7 +129,7 @@ class Simulator:
         ]
 
         ## cash flows
-        cashflows = pd.concat(
+        cashflow_frame = pd.concat(
             [
                 investment.simulate_cashflows(
                     start_date=self.start_date,
