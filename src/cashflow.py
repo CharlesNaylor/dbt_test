@@ -49,7 +49,10 @@ class CashFlow(Element):
     def from_series(cls, cashflow: pd.Series):
         """Generate from an existing pandas Series object"""
         return cls(
-            cashflow=cashflow, start_date=cashflow.index[0], end_date=cashflow.index[-1]
+            cashflow=cashflow,
+            start_date=cashflow.index[0],
+            end_date=cashflow.index[-1],
+            name=cashflow.name,
         )
 
     @classmethod

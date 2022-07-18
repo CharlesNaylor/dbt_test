@@ -17,6 +17,11 @@ class Customer:
     name: str
     turnover: float
 
+    @classmethod
+    def from_series(cls, series):
+        """reconstitute from the parquet"""
+        return cls(**series.to_dict())
+
     def to_frame(self):
         """Output as a dataframe row"""
         return pd.Series(asdict(self))

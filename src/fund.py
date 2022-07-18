@@ -25,6 +25,20 @@ class Fund(Element):
     return_params: List[float] = field(default_factory=lambda: [0.01, 0.005])
     return_generator: Callable = np.random.normal
 
+    @classmethod
+    def from_series(cls, series: pd.Series):
+        """reconstitute from a pandas series"""
+        series["return_generator"] = cls.generator_for_string(
+            series["return_generator"]
+        )
+        return Fund(**series.to_dict())
+
+    @staticmethod
+    def generator_for_string(generator: str) -> Callable:
+        """get a proper generator from a string (currently only supports normal)"""
+        OPTIONS = {"normal": np.random.normal}
+        return OPTIONS[generator]
+
     def to_frame(self):
         """Output as a dataframe row"""
         out = asdict(self)
