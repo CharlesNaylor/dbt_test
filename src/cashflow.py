@@ -6,8 +6,10 @@ import datetime
 import numpy as np
 import pandas as pd
 
+from src.element import Element
 
-class CashFlow:
+
+class CashFlow(Element):
     """
     Pct Cashflows for an arbitrary account
 
@@ -24,6 +26,7 @@ class CashFlow:
         start_date: datetime.date,
         end_date: datetime.date,
         turnover_param: float = None,
+        name: str = None,
     ):
         """
         Pct Cashflows for an arbitrary account
@@ -31,13 +34,14 @@ class CashFlow:
         :param cashflow: the actual cashflow values
         :param start_date: the date investment started
         :param end_date: the date records ended
-        :param turnover_param: the degree to which the customer churns the account (used for simulation)
-        as the simulation's use of this parameter is non-deterministic, it won't be calculated when
-        cashflows are provided ahead
+        :param turnover_param: the degree to which the customer churns the account (used for
+        simulation) as the simulation's use of this parameter is non-deterministic,
+        it won't be calculated when cashflows are provided ahead
         """
         self.cashflow = cashflow
         self.start_date = start_date
         self.end_date = end_date
+        self.name = name
 
         self.turnover_param = turnover_param
 
@@ -50,14 +54,16 @@ class CashFlow:
 
     @classmethod
     def from_parameters(
-        cls, start_date: datetime.date, end_date: datetime.date, turnover: float
+        cls,
+        start_date: datetime.date,
+        end_date: datetime.date,
+        turnover: float,
+        name: str = None,
     ):
         """Generate cashflows according to customer turnover.
         Note no association with fund performance has been included"""
 
-        cashflow = pd.DataFrame(
-            index=pd.date_range(start_date, end_date, freq="B"),
-        )
+        cashflow = pd.Series(index=pd.date_range(start_date, end_date, freq="B"))
         n_days = cashflow.shape[0]
 
         # turnover of 5, for our purposes,
@@ -78,7 +84,7 @@ class CashFlow:
         values = np.zeros(n_days)
         values[cashflow_days] = cashflow_sizes
 
-        cashflow.values = values
+        cashflow = pd.Series(data=values, index=cashflow.index, name=name)
 
         return cls(
             cashflow=cashflow,
@@ -86,3 +92,7 @@ class CashFlow:
             end_date=end_date,
             turnover_param=turnover,
         )
+
+    def to_frame(self):
+        """just return the cashflow series"""
+        return self.cashflow

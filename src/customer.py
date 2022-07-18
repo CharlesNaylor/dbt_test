@@ -20,3 +20,6 @@ class Customer:
     def to_frame(self):
         """Output as a dataframe row"""
         return pd.Series(asdict(self))
+
+    def __str__(self):
+        return self.name

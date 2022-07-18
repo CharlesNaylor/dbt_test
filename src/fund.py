@@ -8,9 +8,11 @@ from typing import Callable, List
 import pandas as pd
 import numpy as np
 
+from src.element import Element
+
 
 @dataclass
-class Fund:
+class Fund(Element):
     """
     An investable fund
 
@@ -41,7 +43,7 @@ class Fund:
 
 
 @dataclass
-class FundShareClass:
+class FundShareClass(Element):
     """A shareclass of an investable fund"""
 
     name: str
@@ -56,4 +58,4 @@ class FundShareClass:
 
     def __repr__(self):
         """NB. we are not enforcing uniqueness anywhere"""
-        return f"{self.fund_name}_{self.name}"
+        return f"{self.fund.name}_{self.name}"
