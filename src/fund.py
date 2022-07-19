@@ -8,9 +8,11 @@ from typing import Callable, List
 import pandas as pd
 import numpy as np
 
+from src.element import Element
+
 
 @dataclass
-class Fund:
+class Fund(Element):
     """
     An investable fund
 
@@ -22,6 +24,20 @@ class Fund:
     end_date: datetime.date
     return_params: List[float] = field(default_factory=lambda: [0.01, 0.005])
     return_generator: Callable = np.random.normal
+
+    @classmethod
+    def from_series(cls, series: pd.Series):
+        """reconstitute from a pandas series"""
+        series["return_generator"] = cls.generator_for_string(
+            series["return_generator"]
+        )
+        return cls(**series.to_dict())
+
+    @staticmethod
+    def generator_for_string(generator: str) -> Callable:
+        """get a proper generator from a string (currently only supports normal)"""
+        options = {"normal": np.random.normal}
+        return options[generator]
 
     def to_frame(self):
         """Output as a dataframe row"""
@@ -41,18 +57,26 @@ class Fund:
 
 
 @dataclass
-class FundShareClass:
+class FundShareClass(Element):
     """A shareclass of an investable fund"""
 
     name: str
-    fund_name: str  # fk to Fund name
-    mgmt_fee: float
-    perf_fee: float
+    fund: Fund  # fk to Fund name
+    expense_ratio: float
+
+    @classmethod
+    def from_series(cls, series: pd.Series, funds: List[Fund]):
+        """reconstitute from a pandas series"""
+        params = series.to_dict()
+        params["fund"] = funds[params["fund"]]
+        return cls(**params)
 
     def to_frame(self):
         """Output as a dataframe row"""
-        return pd.Series(asdict(self))
+        return pd.Series(
+            dict(name=self.name, fund=self.fund.name, expense_ratio=self.expense_ratio)
+        )
 
     def __repr__(self):
         """NB. we are not enforcing uniqueness anywhere"""
-        return f"{self.fund_name}_{self.name}"
+        return f"{self.fund.name}_{self.name}"
