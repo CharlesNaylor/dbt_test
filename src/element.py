@@ -3,7 +3,6 @@ Base class for accounting elements
 """
 
 import abc
-from dataclasses import asdict
 
 
 class Element(abc.ABC):

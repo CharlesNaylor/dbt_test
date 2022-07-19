@@ -1,1 +1,1 @@
-{"start_date": "2017-01-01", "end_date": "2022-05-31", "num_shareclasses": 2, "num_funds": 1, "num_customers": 25, "avg_turnover": 1, "expense_ratios": [0.95, 0.96, 0.97, 0.98, 0.99]}
+{"start_date": "2017-01-01", "end_date": "2022-05-31", "num_shareclasses": 2, "num_funds": 10, "num_customers": 25, "avg_turnover": 1, "expense_ratios": [0.95, 0.96, 0.97, 0.98, 0.99]}

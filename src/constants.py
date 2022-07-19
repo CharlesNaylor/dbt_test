@@ -1,6 +1,24 @@
 """hard-coded constants for the sim"""
 
-FUND_NAMES = ["value", "growth", "tech", "esg"]
+FUND_NAMES = [
+    "divincome",
+    "emerging",
+    "esg",
+    "fixedincome",
+    "growth",
+    "junkbond",
+    "largecap",
+    "midcap",
+    "momentum",
+    "reit",
+    "retire20",
+    "smallcap",
+    "spx",
+    "tech",
+    "value",
+    "vice",
+    "world",
+]
 
 SHARECLASS_NAMES = list("ABCDEFG")
 

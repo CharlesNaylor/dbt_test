@@ -31,13 +31,13 @@ class Fund(Element):
         series["return_generator"] = cls.generator_for_string(
             series["return_generator"]
         )
-        return Fund(**series.to_dict())
+        return cls(**series.to_dict())
 
     @staticmethod
     def generator_for_string(generator: str) -> Callable:
         """get a proper generator from a string (currently only supports normal)"""
-        OPTIONS = {"normal": np.random.normal}
-        return OPTIONS[generator]
+        options = {"normal": np.random.normal}
+        return options[generator]
 
     def to_frame(self):
         """Output as a dataframe row"""
@@ -63,6 +63,13 @@ class FundShareClass(Element):
     name: str
     fund: Fund  # fk to Fund name
     expense_ratio: float
+
+    @classmethod
+    def from_series(cls, series: pd.Series, funds: List[Fund]):
+        """reconstitute from a pandas series"""
+        params = series.to_dict()
+        params["fund"] = funds[params["fund"]]
+        return cls(**params)
 
     def to_frame(self):
         """Output as a dataframe row"""

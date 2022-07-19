@@ -39,6 +39,11 @@ class Account(Element):
         self.cashflows = cashflows
         self.initial_investment = initial_investment
 
+    @property
+    def name(self):
+        """account name"""
+        return str(self)
+
     def __str__(self):
         return f"{self.customer}-{self.shareclass}"
 
@@ -71,13 +76,16 @@ class Account(Element):
         )
 
         values = pd.DataFrame(
-            {"gross_return": gross_returns, "cashflow": self.cashflows}
+            {"gross_return": gross_returns, "cashflow": self.cashflows.cashflow}
         )
-        values = pd.merge(
-            values,
-            pd.DataFrame(
-                index=values.index, columns=["init_GAV", "GAV", "expense", "NAV"]
-            ),
+        values = pd.concat(
+            [
+                values,
+                pd.DataFrame(
+                    index=values.index, columns=["init_GAV", "GAV", "expense", "NAV"]
+                ),
+            ],
+            axis=1,
         )
 
         # TODO: do we have to iterate? I think so.
